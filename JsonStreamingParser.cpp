@@ -31,10 +31,17 @@ JsonStreamingParser::JsonStreamingParser() {
 
 void JsonStreamingParser::reset() {
     state = STATE_START_DOCUMENT;
-    bufferPos = 0;
     unicodeEscapeBufferPos = 0;
     unicodeBufferPos = 0;
     characterCounter = 0;
+	resetBuffer();
+}
+
+void JsonStreamingParser::resetBuffer() {
+	bufferPos = 0;
+	bufferSize = BUFFER_INCREMENT;
+	free(buffer);
+	buffer = (char *) malloc(sizeof(char) * bufferSize);
 }
 
 void JsonStreamingParser::setListener(JsonListener* listener) {
@@ -202,7 +209,18 @@ void JsonStreamingParser::parse(char c) {
   }
 
 void JsonStreamingParser::increaseBufferPointer() {
-  bufferPos = min(bufferPos + 1, BUFFER_MAX_LENGTH - 1);
+  //bufferPos = min(bufferPos + 1, BUFFER_MAX_LENGTH - 1);
+  if (bufferPos + 1 > bufferSize - 5) {
+	char *newPtr = (char *) realloc(buffer, sizeof(char) * (bufferSize + BUFFER_INCREMENT));
+	if (newPtr == NULL) {
+		bufferPos--;
+	}
+	else {
+		buffer = newPtr;
+		bufferSize += BUFFER_INCREMENT;
+	}
+  }
+  bufferPos++;
 }
 
 void JsonStreamingParser::endString() {
@@ -220,7 +238,7 @@ void JsonStreamingParser::endString() {
       // throw new ParsingError($this->_line_number, $this->_char_number,
       // "Unexpected end of string.");
     }
-    bufferPos = 0;
+	resetBuffer();
   }
 void JsonStreamingParser::startValue(char c) {
     if (c == '[') {
@@ -413,7 +431,7 @@ void JsonStreamingParser::endNumber() {
     //  result = value.toFloat();
     //}
     myListener->value(value.c_str());
-    bufferPos = 0;
+	resetBuffer();
     state = STATE_AFTER_VALUE;
   }
 
@@ -440,7 +458,7 @@ void JsonStreamingParser::endTrue() {
       // throw new ParsingError($this->_line_number, $this->_char_number,
       // "Expected 'true'. Got: ".$true);
     }
-    bufferPos = 0;
+	resetBuffer();
     state = STATE_AFTER_VALUE;
   }
 
@@ -453,7 +471,7 @@ void JsonStreamingParser::endFalse() {
       // throw new ParsingError($this->_line_number, $this->_char_number,
       // "Expected 'true'. Got: ".$true);
     }
-    bufferPos = 0;
+    resetBuffer();
     state = STATE_AFTER_VALUE;
   }
 
@@ -466,7 +484,7 @@ void JsonStreamingParser::endNull() {
       // throw new ParsingError($this->_line_number, $this->_char_number,
       // "Expected 'true'. Got: ".$true);
     }
-    bufferPos = 0;
+    resetBuffer();
     state = STATE_AFTER_VALUE;
   }
 

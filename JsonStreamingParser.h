@@ -49,7 +49,8 @@ See more at http://blog.squix.ch and https://github.com/squix78/json-streaming-p
 #define STACK_KEY                2
 #define STACK_STRING             3
 
-#define BUFFER_MAX_LENGTH  512
+//#define BUFFER_MAX_LENGTH  512
+#define BUFFER_INCREMENT 128
 
 class JsonStreamingParser {
   private:
@@ -62,8 +63,10 @@ class JsonStreamingParser {
 
     boolean doEmitWhitespace = false;
     // fixed length buffer array to prepare for c code
-    char buffer[BUFFER_MAX_LENGTH];
+    //char buffer[BUFFER_MAX_LENGTH];
+	char *buffer = NULL;
     int bufferPos = 0;
+	int bufferSize = 0;
 
     char unicodeEscapeBuffer[10];
     int unicodeEscapeBufferPos = 0;
@@ -132,4 +135,5 @@ class JsonStreamingParser {
     void parse(char c);
     void setListener(JsonListener* listener);
     void reset();
+	void resetBuffer();
 };
