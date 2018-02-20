@@ -42,7 +42,6 @@ void JsonStreamingParser::resetBuffer() {
 	bufferSize = BUFFER_INCREMENT;
 	free(buffer);
 	buffer = (char *) malloc(sizeof(char) * bufferSize);
-	memset(buffer, 0, sizeof(char) * bufferSize);
 }
 
 void JsonStreamingParser::setListener(JsonListener* listener) {
@@ -218,7 +217,6 @@ void JsonStreamingParser::increaseBufferPointer() {
 	}
 	else {
 		buffer = newPtr;
-		memset(buffer + bufferSize, 0, sizeof(char) * BUFFER_INCREMENT);
 		bufferSize += BUFFER_INCREMENT;
 	}
   }
